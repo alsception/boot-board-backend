@@ -75,7 +75,8 @@ public class EntriesController {
             int result = repository.delete(id);
             if(result == 1)
                 return "Entry deleted";
-            else return "Error deleting entry";
+            else 
+                return "No entry found";
         }
         catch(Exception ex)
         {
@@ -85,70 +86,5 @@ public class EntriesController {
     }
     
     
-/*
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) 
-    {
-        try
-        {
-            return repository.updateUser(id, user);
-        }
-        catch(Exception ex)
-        {
-            throw new BadRequestException(ex.getMessage());
-        }
-    }*/
-
-  /*  */
-    
-//       
-//    private PaginatedResponse<User> findAllWithPagination(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size)
-//    {
-//        List<User> users = userRedisRepository.findAll(page, size);
-//        long totalItems = userRedisRepository.count();
-//        int totalPages = (int) Math.ceil((double) totalItems / size);
-//
-//        return new PaginatedResponse<>(users, totalItems, totalPages, page);
-//    }    
-//    
-//    private List<User> findAll()
-//    {       
-//        return userRedisRepository.findAll();
-//    }
-//    
-//    @GetMapping
-//    public Object findAll(
-//            @RequestParam(required = false) Integer page,
-//            @RequestParam(required = false) Integer size)
-//    {       
-//        if(page==null && size==null)
-//            return findAll();
-//        else
-//            return findAllWithPagination(page, size);
-//    }
-    
-//    @PostMapping
-//    public BasicResponse save(@RequestBody User user)
-//    {
-//        if(user.getUsername()==null || "".equals(user.getUsername()))
-//        {
-//            throw new BadRequestException("Username is mandatory");
-//        }
-//        user.setActive(true);
-//        try
-//        {
-//            System.out.println("saving user: "+user.toString());
-//            userRedisRepository.save(user);
-//            System.out.println("saved");
-//            return new BasicResponse("User saved with ID: " + user.getId());
-//            //return userRedisRepository.save(user);
-//        }
-//        catch(Exception ex)
-//        {
-//            throw new BadRequestException(ex.getMessage());
-//        }         
-//    }
     
 }
