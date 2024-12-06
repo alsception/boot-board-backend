@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BootBoard API</title>
+</head>
+<body>
+    <h1>Welcome to the BootBoard API</h1>
+    <p>This is a RESTful API for managing users,boards, and entries using basic CRUD operations</p>
+    <p>Available endpoints:</p>
+    <ul>
+        <li><a href="/bootboard/api/v1/users">GET /bootboard/api/v1/users - List all users - connecting to MySQL database</a></li>
+        <li style="display:none;"><a href="/bootboard/api/v2/users">GET /bootboard/api/v2/users - List all users - using Redis caching layer </a></li>
+        <li><a href="/bootboard/api/v1/users/1">GET /api/users/{id} - Get a user by ID</a></li>
+        <li>POST /api/users - Create a new user</li>
+        <li>PUT /api/users/{id} - Update a user</li>
+        <li>DELETE /api/users/{id} - Delete a user</li>
+    </ul>
+</body>
+</html>
