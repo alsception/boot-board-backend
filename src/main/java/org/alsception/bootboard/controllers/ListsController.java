@@ -2,31 +2,32 @@ package org.alsception.bootboard.controllers;
 
 import java.util.List;
 import java.util.Optional;
-import org.alsception.bootboard.entities.Entry;
+import org.alsception.bootboard.entities.CardList;
 import org.alsception.bootboard.error.BadRequestException;
-import org.alsception.bootboard.repositories.EntryRepository;
+import org.alsception.bootboard.repositories.ListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/entries")
-public class EntriesController {
+@RequestMapping("/api/v1/lists")
+@CrossOrigin(origins = "*")//or 4200 for dev
+public class ListsController {
 
     @Autowired
-    private EntryRepository repository;
+    private ListRepository listRepository;
     
     @PostMapping
-    public String create(@RequestBody Entry entry) throws BadRequestException 
+    public String create(@RequestBody CardList entry) throws BadRequestException 
     {
         int result = 0;
         try
         {
-            result = repository.create(entry);
+            result = listRepository.create(entry);
             
             if(result>0){
-                return "Entry created";
+                return "List created";
             }else{
-                return "Error creating entry";
+                return "Error creating list";
             }
         }
         catch(Exception ex)
@@ -37,29 +38,35 @@ public class EntriesController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Entry> get(@PathVariable Long id) 
+    public Optional<CardList> get(@PathVariable Long id) 
     {
-        return repository.findById(id);
+        return listRepository.findById(id);
     }
-
-    @GetMapping
-    public List<Entry> getAll() 
+    
+    @GetMapping("/{id}/cards")
+    public Optional<CardList> getWithCards(@PathVariable Long id) 
     {
-        return repository.findAll();
+        return listRepository.findByIdWithCards(id);
+    }
+    
+    @GetMapping()
+    public Optional<CardList> getAll(@PathVariable Long id) 
+    {
+        return listRepository.findById(id);
     }
     
     //TODO: search by text and pagination
     
     @PutMapping("/{id}")
-    public Optional<Entry> update(@PathVariable Long id, @RequestBody Entry entry) 
+    public Optional<CardList> update(@PathVariable Long id, @RequestBody CardList list) 
     {
-        if(id!=entry.getId()){
+        if(id!=list.getId()){
             throw new BadRequestException("Wrong id");
         }
         try
         {
-            repository.update(entry);
-            return repository.findById(id);
+            listRepository.update(list);
+            return listRepository.findById(id);
         }
         catch(Exception ex)
         {
@@ -72,11 +79,11 @@ public class EntriesController {
     {
         try
         {
-            int result = repository.delete(id);
+            int result = listRepository.delete(id);
             if(result == 1)
-                return "Entry deleted";
+                return "List deleted";
             else 
-                return "No entry found";
+                return "No list found";
         }
         catch(Exception ex)
         {

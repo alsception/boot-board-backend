@@ -18,13 +18,13 @@ public class UserRepository {
         String sql = "SELECT * FROM users";
         return jdbcTemplate.query(sql, (rs, rowNum) ->                                
             new User(
-                    rs.getLong("id"),                         
-                    rs.getString("username"), 
-                    rs.getString("password"),                         
-                    rs.getString("first_name"),
-                    rs.getString("last_name"),
-                    rs.getString("email"),                    
-                    rs.getBoolean("active")                
+                rs.getLong("id"),                         
+                rs.getString("username"), 
+                rs.getString("password"),                         
+                rs.getString("first_name"),
+                rs.getString("last_name"),
+                rs.getString("email"),                    
+                rs.getBoolean("active")                
             ));
     }
 

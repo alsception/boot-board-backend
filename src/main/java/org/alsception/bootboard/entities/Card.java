@@ -6,39 +6,41 @@ import java.io.Serializable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data //Lombook for code injection (getters and setters)
+@Data //Lombook for getters and setters
 @NoArgsConstructor
-public class Entry implements Serializable 
+public class Card implements Serializable 
 {
     private Long id;   
     private Long userId;  
     private Long listId;  
-    private String text;
     private String title;    
+    private String text;
     private String color;    
+    private String type;
     private int position;
         
-    public Entry(Long id){
+    public Card(Long id){
         this.id = id;
     }
     
-    public Entry(String text){
-        this.text = text;
+    public Card(String title){
+        this.title = title;
     }
     
-    public Entry(Long id, String text){
+    public Card(Long id, String text){
         this.id = id;
         this.text = text;
     }
     
     @JsonCreator
-    public Entry(
+    public Card(
             @JsonProperty("id") Long id, 
             @JsonProperty("userId") Long userId, 
             @JsonProperty("listId") Long listId, 
-            @JsonProperty("text") String text, 
             @JsonProperty("title") String title, 
+            @JsonProperty("text") String text, 
             @JsonProperty("color") String color, 
+            @JsonProperty("type") String type, 
             @JsonProperty("position") int position)
     {
         this.id = id;
@@ -47,6 +49,7 @@ public class Entry implements Serializable
         this.text = text;
         this.title = title;
         this.color = color;
+        this.type = type;
         this.position = position;
     }
 }

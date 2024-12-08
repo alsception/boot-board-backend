@@ -15,8 +15,9 @@ public class Board implements Serializable
     private Long userId;  
     private String title;    
     private String color;    
+    private String type;    
     private int position;
-    private List<EntryList> lists;
+    private List<CardList> lists;
         
     public Board(Long id){
         this.id = id;
@@ -38,12 +39,14 @@ public class Board implements Serializable
             @JsonProperty("boardId") Long boardId, 
             @JsonProperty("title") String title, 
             @JsonProperty("color") String color, 
+            @JsonProperty("type") String type, 
             @JsonProperty("position") int position)
     {
         this.id = id;
         this.userId = userId;
         this.title = title;
         this.color = color;
+        this.type = type;
         this.position = position;
     }
 }
