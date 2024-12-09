@@ -1,10 +1,16 @@
 package org.alsception.bootboard.repositories;
 
-import org.alsception.bootboard.entities.Card;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import org.alsception.bootboard.entities.BBCard;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -21,16 +27,16 @@ public class CardRepository {
         this.jdbcTemplate = jdbcTemplate;
     }   
 
-    public int create(Card card) {
+    public int create(BBCard card) {
         String sql = "INSERT INTO " + TABLE_NAME + " (user_id, list_id, title, text, color, type, position) VALUES (?, ?, ?, ?, ?, ?, ?)";
         System.out.println(sql);
         return jdbcTemplate.update(sql, card.getUserId(), card.getListId(), card.getTitle(), card.getText(), card.getColor(), card.getType(), card.getPosition());
     }
     
-    public List<Card> findAll() {
+    public List<BBCard> findAll() {
         String sql = SELECT_CLAUSE;
         return jdbcTemplate.query(sql, (rs, rowNum) ->                                
-            new Card(
+            new BBCard(
                 rs.getLong("id"),                         
                 rs.getLong("user_id"),                         
                 rs.getLong("list_id"),                         
@@ -38,14 +44,20 @@ public class CardRepository {
                 rs.getString("text"), 
                 rs.getString("color"),
                 rs.getString("type"), 
-                rs.getInt("position")
+                rs.getInt("position"),
+                rs.getTimestamp("created").toLocalDateTime(),
+                rs.getTimestamp("updated").toLocalDateTime()
             ));
     }
     
-    public Optional<Card> findById(Long id) {
+    public Optional<BBCard> findById(Long id) {
         String sql = SELECT_CLAUSE + WHERE_ID;
         try {
-            Card card = jdbcTemplate.queryForObject(sql, new Object[]{id}, cardRowMapper());
+            BBCard card = jdbcTemplate.queryForObject(sql, new Object[]{id}, cardRowMapper());
+            
+            //get datatime
+            
+            
             return Optional.of(card); // Wrap the result in Optional
         } catch (EmptyResultDataAccessException e) {
             System.out.println("No card found with id: " + id);
@@ -53,15 +65,30 @@ public class CardRepository {
         }
     }
     
-    public Optional<List<Card>> findByListId(Long listId) 
+    public void gettime(){
+        String sql = "SELECT created FROM cards";
+    
+        jdbcTemplate.query(sql, resultSet -> {
+            try {
+                if (resultSet.next()) {
+                    Timestamp timestamp = resultSet.getTimestamp("created");
+                    LocalDateTime localDateTime = timestamp.toLocalDateTime();
+                    System.out.println("LocalDateTime: " + localDateTime);
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(CardRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+    }
+    
+    public Optional<List<BBCard>> findByListId(Long listId) 
     {
         System.out.println("findByListId");
         String sql = SELECT_CLAUSE + " WHERE list_id = ?";
 
         try {
-            List<Card> cards = jdbcTemplate.query(
-                    sql, new Object[]{listId}, // Pass the parameter value for the placeholder
-                    (rs, rowNum) -> new Card(
+            List<BBCard> cards = jdbcTemplate.query(sql, new Object[]{listId}, // Pass the parameter value for the placeholder
+                    (rs, rowNum) -> new BBCard(
                         rs.getLong("id"),
                         rs.getLong("user_id"),
                         rs.getLong("list_id"),
@@ -69,7 +96,9 @@ public class CardRepository {
                         rs.getString("text"),
                         rs.getString("color"),
                         rs.getString("type"),
-                        rs.getInt("position")
+                        rs.getInt("position"),
+                        rs.getTimestamp("created").toLocalDateTime(),
+                        rs.getTimestamp("updated").toLocalDateTime()
                     ));
             return Optional.of(cards); // Wrap the result in Optional
         } catch (EmptyResultDataAccessException e) {
@@ -78,10 +107,10 @@ public class CardRepository {
         }
     }
     
-    // RowMapper to map result set to Card object
-    private RowMapper<Card> cardRowMapper() {
+    // RowMapper to map result set to BBCard object
+    private RowMapper<BBCard> cardRowMapper() {
         return (rs, rowNum) -> {
-            Card card = new Card();
+            BBCard card = new BBCard();
             card.setId(rs.getLong("id"));
             card.setListId(rs.getLong("list_id"));
             card.setUserId(rs.getLong("user_id"));
@@ -90,12 +119,14 @@ public class CardRepository {
             card.setColor(rs.getString("color"));
             card.setType(rs.getString("type"));
             card.setPosition(rs.getInt("position"));
+            card.setCreated(rs.getTimestamp("created").toLocalDateTime());
+            card.setUpdated(rs.getTimestamp("updated").toLocalDateTime());
             return card;
         };
     }
     
     // This method will update only list's (meta)data, without touching underlying cards
-    public int update(Card e) {
+    public int update(BBCard e) {
         String sql = "UPDATE " + TABLE_NAME + " SET "
                 + "user_id = ?, "
                 + "list_id = ?, "

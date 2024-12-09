@@ -2,7 +2,7 @@ package org.alsception.bootboard.controllers;
 
 import java.util.List;
 import java.util.Optional;
-import org.alsception.bootboard.entities.CardList;
+import org.alsception.bootboard.entities.BBList;
 import org.alsception.bootboard.error.BadRequestException;
 import org.alsception.bootboard.repositories.ListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class ListsController {
     private ListRepository listRepository;
     
     @PostMapping
-    public String create(@RequestBody CardList entry) throws BadRequestException 
+    public String create(@RequestBody BBList entry) throws BadRequestException 
     {
         int result = 0;
         try
@@ -38,27 +38,35 @@ public class ListsController {
     }
 
     @GetMapping("/{id}")
-    public Optional<CardList> get(@PathVariable Long id) 
+    public Optional<BBList> get(@PathVariable Long id) 
     {
         return listRepository.findById(id);
     }
     
     @GetMapping("/{id}/cards")
-    public Optional<CardList> getWithCards(@PathVariable Long id) 
+    public Optional<BBList> getWithCards(@PathVariable Long id) 
     {
         return listRepository.findByIdWithCards(id);
     }
     
     @GetMapping()
-    public Optional<CardList> getAll(@PathVariable Long id) 
+    public Optional<List<BBList>> getAll() 
     {
-        return listRepository.findById(id);
+        return listRepository.findAll();
+    }
+    
+    @GetMapping("/cards")
+    public List<BBList> getAllWithCards() 
+    {
+        //TODO: load cards
+        System.out.println("get all with cards");
+        return listRepository.findAllWithCards();
     }
     
     //TODO: search by text and pagination
     
     @PutMapping("/{id}")
-    public Optional<CardList> update(@PathVariable Long id, @RequestBody CardList list) 
+    public Optional<BBList> update(@PathVariable Long id, @RequestBody BBList list) 
     {
         if(id!=list.getId()){
             throw new BadRequestException("Wrong id");

@@ -2,7 +2,7 @@ package org.alsception.bootboard.controllers;
 
 import java.util.List;
 import java.util.Optional;
-import org.alsception.bootboard.entities.Card;
+import org.alsception.bootboard.entities.BBCard;
 import org.alsception.bootboard.error.BadRequestException;
 import org.alsception.bootboard.repositories.CardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class CardsController {
     private CardRepository repository;
     
     @PostMapping
-    public String create(@RequestBody Card entry) throws BadRequestException 
+    public String create(@RequestBody BBCard entry) throws BadRequestException 
     {
         int result = 0;
         try
@@ -38,13 +38,13 @@ public class CardsController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Card> get(@PathVariable Long id) 
+    public Optional<BBCard> get(@PathVariable Long id) 
     {
         return repository.findById(id);
     }
 
     @GetMapping
-    public List<Card> getAll() 
+    public List<BBCard> getAll() 
     {
         return repository.findAll();
     }
@@ -52,7 +52,7 @@ public class CardsController {
     //TODO: search by text and pagination
     
     @PutMapping("/{id}")
-    public Optional<Card> update(@PathVariable Long id, @RequestBody Card entry) 
+    public Optional<BBCard> update(@PathVariable Long id, @RequestBody BBCard entry) 
     {
         if(id!=entry.getId()){
             throw new BadRequestException("Wrong id");

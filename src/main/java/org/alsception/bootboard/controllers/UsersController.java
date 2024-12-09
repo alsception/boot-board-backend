@@ -2,7 +2,7 @@ package org.alsception.bootboard.controllers;
 
 import java.util.List;
 import org.alsception.bootboard.error.BadRequestException;
-import org.alsception.bootboard.entities.User;
+import org.alsception.bootboard.entities.BBUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +13,7 @@ import org.alsception.bootboard.repositories.UserRepository;
 
 @RestController
 @RequestMapping("/api/v1/users")
-//@Tag(name = "User management API", description = "Endpoints for CRUD operations")
+//@Tag(name = "BBUser management API", description = "Endpoints for CRUD operations")
 public class UsersController {
 
     @Autowired
@@ -21,7 +21,7 @@ public class UsersController {
     
     @PostMapping
     //@Operation(summary = "Create user", description = "Creates a new user")
-    public int createUser(@RequestBody User user) throws BadRequestException 
+    public int createUser(@RequestBody BBUser user) throws BadRequestException 
     {
         if(user.getUsername() == null || "".equals(user.getUsername()))
         {
@@ -47,7 +47,7 @@ public class UsersController {
     }*/
 
     @GetMapping
-    public List<User> getUsers( // todo pageable
+    public List<BBUser> getUsers( // todo pageable
             @RequestParam(required = false) String name
             //@RequestParam(defaultValue = "0") int page,
             //@RequestParam(defaultValue = "10") int size
@@ -59,7 +59,7 @@ public class UsersController {
     }
 /*
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) 
+    public BBUser updateUser(@PathVariable Long id, @RequestBody BBUser user) 
     {
         try
         {
@@ -106,7 +106,7 @@ public class UsersController {
 //    }
     
 //    @PostMapping
-//    public BasicResponse save(@RequestBody User user)
+//    public BasicResponse save(@RequestBody BBUser user)
 //    {
 //        if(user.getUsername()==null || "".equals(user.getUsername()))
 //        {
@@ -118,7 +118,7 @@ public class UsersController {
 //            System.out.println("saving user: "+user.toString());
 //            userRedisRepository.save(user);
 //            System.out.println("saved");
-//            return new BasicResponse("User saved with ID: " + user.getId());
+//            return new BasicResponse("BBUser saved with ID: " + user.getId());
 //            //return userRedisRepository.save(user);
 //        }
 //        catch(Exception ex)
