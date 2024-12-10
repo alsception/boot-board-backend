@@ -51,16 +51,24 @@ public class CardsController {
     
     //TODO: search by text and pagination
     
-    @PutMapping("/{id}")
-    public Optional<BBCard> update(@PathVariable Long id, @RequestBody BBCard entry) 
+    @PutMapping(/*"/{id}"*/)
+    public Optional<BBCard> update(/*@PathVariable Long id, */@RequestBody BBCard card) 
     {
-        if(id!=entry.getId()){
-            throw new BadRequestException("Wrong id");
+        if(card==null)
+            System.out.println("card is null...");
+        
+        System.out.println("Update card:");
+        System.out.println("Received item: ");
+        System.out.println(card);
+        
+        
+        if(null==card.getId()){
+            throw new BadRequestException("Missing id");
         }
         try
         {
-            repository.update(entry);
-            return repository.findById(id);
+            repository.update(card);
+            return repository.findById(card.getId());
         }
         catch(Exception ex)
         {

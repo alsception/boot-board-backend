@@ -15,7 +15,7 @@ public class BBCard implements Serializable
     private Long userId;  
     private Long listId;  
     private String title;    
-    private String text;
+    private String description;
     private String color;    
     private String type;
     private int position;
@@ -31,9 +31,9 @@ public class BBCard implements Serializable
         this.title = title;
     }
     
-    public BBCard(Long id, String text){
+    public BBCard(Long id, String description){
         this.id = id;
-        this.text = text;
+        this.description = description;
     }
     
     @JsonCreator
@@ -42,7 +42,7 @@ public class BBCard implements Serializable
             @JsonProperty("userId") Long userId, 
             @JsonProperty("listId") Long listId, 
             @JsonProperty("title") String title, 
-            @JsonProperty("text") String text, 
+            @JsonProperty("description") String description, 
             @JsonProperty("color") String color, 
             @JsonProperty("type") String type, 
             @JsonProperty("position") int position,
@@ -52,7 +52,7 @@ public class BBCard implements Serializable
         this.id = id;
         this.userId = userId;
         this.listId = listId; 
-        this.text = text;
+        this.description = description;
         this.title = title;
         this.color = color;
         this.type = type;

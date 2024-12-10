@@ -28,9 +28,9 @@ public class CardRepository {
     }   
 
     public int create(BBCard card) {
-        String sql = "INSERT INTO " + TABLE_NAME + " (user_id, list_id, title, text, color, type, position) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO " + TABLE_NAME + " (user_id, list_id, title, description, color, type, position) VALUES (?, ?, ?, ?, ?, ?, ?)";
         System.out.println(sql);
-        return jdbcTemplate.update(sql, card.getUserId(), card.getListId(), card.getTitle(), card.getText(), card.getColor(), card.getType(), card.getPosition());
+        return jdbcTemplate.update(sql, card.getUserId(), card.getListId(), card.getTitle(), card.getDescription(), card.getColor(), card.getType(), card.getPosition());
     }
     
     public List<BBCard> findAll() {
@@ -41,7 +41,7 @@ public class CardRepository {
                 rs.getLong("user_id"),                         
                 rs.getLong("list_id"),                         
                 rs.getString("title"),    
-                rs.getString("text"), 
+                rs.getString("description"), 
                 rs.getString("color"),
                 rs.getString("type"), 
                 rs.getInt("position"),
@@ -93,7 +93,7 @@ public class CardRepository {
                         rs.getLong("user_id"),
                         rs.getLong("list_id"),
                         rs.getString("title"),
-                        rs.getString("text"),
+                        rs.getString("description"),
                         rs.getString("color"),
                         rs.getString("type"),
                         rs.getInt("position"),
@@ -115,7 +115,7 @@ public class CardRepository {
             card.setListId(rs.getLong("list_id"));
             card.setUserId(rs.getLong("user_id"));
             card.setTitle(rs.getString("title"));
-            card.setText(rs.getString("text"));
+            card.setDescription(rs.getString("description"));
             card.setColor(rs.getString("color"));
             card.setType(rs.getString("type"));
             card.setPosition(rs.getInt("position"));
@@ -125,19 +125,19 @@ public class CardRepository {
         };
     }
     
-    // This method will update only list's (meta)data, without touching underlying cards
     public int update(BBCard e) {
         String sql = "UPDATE " + TABLE_NAME + " SET "
                 + "user_id = ?, "
                 + "list_id = ?, "
-                + "text = ?, "
+                + "description = ?, "
                 + "title = ?, "
                 + "color = ?, "
                 + "type = ?, "
                 + "position = ?, "
-                + "updated_at = CURRENT_TIMESTAMP "
-                + WHERE_ID;        
-        return jdbcTemplate.update(sql, e.getUserId(), e.getListId(), e.getText(), e.getTitle(), e.getColor(), e.getType(), e.getPosition(), e.getId());
+                + "updated = CURRENT_TIMESTAMP "
+                + WHERE_ID;    
+        System.out.println(sql);
+        return jdbcTemplate.update(sql, e.getUserId(), e.getListId(), e.getDescription(), e.getTitle(), e.getColor(), e.getType(), e.getPosition(), e.getId());
     }
     
     public int delete(Long id) {
