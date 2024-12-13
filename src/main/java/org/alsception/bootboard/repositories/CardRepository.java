@@ -26,7 +26,7 @@ public class CardRepository {
     private static final String TABLE_NAME = "cards";
     private static final String SELECT_CLAUSE = "SELECT * FROM `"+TABLE_NAME+"`";
     private static final String WHERE_ID = " WHERE `id` = ?";
-    private static final String ORDER_BY = " ORDER BY CASE WHEN `position` > 0 THEN 0 ELSE 1 END ASC, `position` ASC, `id` ASC";
+    private static final String ORDER_BY = " ORDER BY CASE WHEN `position` > 0 THEN 0 ELSE 1 END ASC, `position` ASC, `updated` ASC, `id` ASC";
     
     public CardRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -53,10 +53,10 @@ public class CardRepository {
         }, keyHolder);
 
         // Retrieve the generated ID
-        long generatedId = keyHolder.getKey().intValue();
-
+        long generatedId = keyHolder.getKey().longValue();
+        
         // Fetch the complete object from the database
-        return findById(generatedId).orElseThrow(() -> new Exception("Error creating card. Could not load new card from database"));
+        return findById(generatedId).orElseThrow(() -> new Exception("Error creating card. Could not load new card from database ERR59"));
     }
     
     public List<BBCard> findAll() {

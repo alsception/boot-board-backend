@@ -1,5 +1,9 @@
 package org.alsception.bootboard.repositories;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import org.alsception.bootboard.entities.BBCard;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -7,8 +11,11 @@ import java.util.List;
 import java.util.Optional;
 import org.alsception.bootboard.entities.BBList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 @Repository
 public class ListRepository {
@@ -27,10 +34,121 @@ public class ListRepository {
         this.jdbcTemplate = jdbcTemplate;
     }   
 
-    public int create(BBList clist) {
+    public BBList create(BBList list) throws Exception
+    {
         String sql = "INSERT INTO " + TABLE_NAME + " (user_id, board_id, title, color, type, position) VALUES (?, ?, ?, ?, ?, ?)";
-        System.out.println(sql);
-        return jdbcTemplate.update(sql, clist.getUserId(), clist.getBoardId(), clist.getTitle(), clist.getColor(), clist.getType(), clist.getPosition());
+        System.out.println(sql);        
+        // Using KeyHolder to capture the generated key
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setLong(1, list.getUserId());
+            ps.setLong(2, list.getBoardId());
+            ps.setString(3, list.getTitle());
+            ps.setString(4, list.getColor().toLowerCase());
+            ps.setString(5, list.getType());
+            ps.setInt(6, list.getPosition());
+            return ps;
+        }, keyHolder);
+
+        // Retrieve the generated ID
+        long generatedId = keyHolder.getKey().longValue();
+
+        // Fetch the complete object from the database
+        BBList createdList = findById(generatedId).orElseThrow(() -> new Exception("Error creating list. Could not load new card from database ERR60"));
+
+        addCards(createdList);
+        
+        //again, with cards, if requested
+        if(createdList.getType().startsWith("ADD")){
+            createdList = findById(generatedId).orElseThrow(() -> new Exception("Error creating list. Could not load new card from database ERR66"));
+        }
+        
+        return createdList;
+        
+    }
+
+    private void addCards(BBList createdList) {
+        //now if requested by client:
+        //create n cards.
+
+        String type = createdList.getType();
+        if( null != type && !"".equals(type))
+        {
+            if(type.startsWith("ADD_CARDS")){
+                
+                stringExtractor(type);
+                
+                String numberPart = type.replaceAll("\\D+", ""); // Remove all non-digit characters
+                try{
+                    int numberParam = Integer.parseInt(numberPart);
+                    
+                    if(numberParam < 0 || numberParam > 999 ){
+                        //-1 could be interesting....
+                        throw new Exception("Invalid number of ADD_CARDS");
+                    }else{
+                        for(int i = 0; i < numberParam; i++)
+                        {
+                            //create card.
+                            System.out.println("Creating card "+i);
+                            BBCard card = new BBCard();
+                            //card.setId(rs.getLong("id"));
+                            card.setListId(createdList.getId());
+                            card.setUserId(createdList.getUserId());
+                            card.setTitle(createdList.getTitle());
+                            card.setDescription("Description");
+                            card.setColor("color");
+                            card.setType("type");
+                            card.setPosition(0);
+                            this.cardRepository.create(card);
+                        }
+                    }
+                }catch(Exception e){
+                    System.out.println("Error extracting number part. ERR71");
+                }
+            }
+        }
+    }
+    
+    private HashMap<String,Object> stringExtractor(String input) 
+    {
+        //test input would be = "ADD_CARDS_10_DESCRIPTION_ASDASDASD_COLOR_RED_TYPE_X";
+        
+        HashMap<String,Object> hmParameters = new HashMap<>();
+        
+        // Ensure string starts with "ADD"
+        if (input.startsWith("ADD")) {
+            // Updated regex to match space-separated parts
+            String regex = "(?:CARDS (\\d+))?(?: DESCRIPTION ([^ ]+))?(?: COLOR ([^ ]+))?(?: TYPE (\\w+))?";
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
+            java.util.regex.Matcher matcher = pattern.matcher(input);
+
+            if (matcher.find()) {
+                // Extract the values (or set them to null if not present)
+                String number = matcher.group(1);
+                String description = matcher.group(2);
+                String color = matcher.group(3);
+                String type = matcher.group(4);
+                
+                hmParameters.put("number", number);
+                hmParameters.put("description", description);
+                hmParameters.put("color", color);
+                hmParameters.put("type", type);
+
+                // Print the extracted parts, handling nulls
+                System.out.println("Number after 'CARDS': " + (number != null ? number : "Not present"));
+                System.out.println("Description: " + (description != null ? description : "Not present"));
+                System.out.println("Color: " + (color != null ? color : "Not present"));
+                System.out.println("Type: " + (type != null ? type : "Not present"));
+            } else {
+                System.out.println("No match found.");
+            }
+        } else {
+            System.out.println("String does not start with 'ADD'.");
+        }
+        
+        return hmParameters;
     }
     
     //1. Load list without cards

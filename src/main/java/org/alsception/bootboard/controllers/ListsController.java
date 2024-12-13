@@ -17,18 +17,11 @@ public class ListsController {
     private ListRepository listRepository;
     
     @PostMapping
-    public String create(@RequestBody BBList entry) throws BadRequestException 
+    public BBList create(@RequestBody BBList entry) throws BadRequestException 
     {
-        int result = 0;
         try
         {
-            result = listRepository.create(entry);
-            
-            if(result>0){
-                return "List created";
-            }else{
-                return "Error creating list";
-            }
+            return listRepository.create(entry);            
         }
         catch(Exception ex)
         {
