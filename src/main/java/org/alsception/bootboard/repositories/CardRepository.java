@@ -1,7 +1,9 @@
 package org.alsception.bootboard.repositories;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import org.alsception.bootboard.entities.BBCard;
@@ -13,6 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 @Repository
 public class CardRepository {
@@ -22,19 +26,41 @@ public class CardRepository {
     private static final String TABLE_NAME = "cards";
     private static final String SELECT_CLAUSE = "SELECT * FROM `"+TABLE_NAME+"`";
     private static final String WHERE_ID = " WHERE `id` = ?";
-
+    private static final String ORDER_BY = " ORDER BY CASE WHEN `position` > 0 THEN 0 ELSE 1 END ASC, `position` ASC, `id` ASC";
+    
     public CardRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }   
 
-    public int create(BBCard card) {
+    public BBCard create(BBCard card) throws Exception
+    {
         String sql = "INSERT INTO " + TABLE_NAME + " (user_id, list_id, title, description, color, type, position) VALUES (?, ?, ?, ?, ?, ?, ?)";
         System.out.println(sql);
-        return jdbcTemplate.update(sql, card.getUserId(), card.getListId(), card.getTitle(), card.getDescription(), card.getColor(), card.getType(), card.getPosition());
+
+        // Using KeyHolder to capture the generated key
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setLong(1, card.getUserId());
+            ps.setLong(2, card.getListId());
+            ps.setString(3, card.getTitle());
+            ps.setString(4, card.getDescription());
+            ps.setString(5, card.getColor());
+            ps.setString(6, card.getType());
+            ps.setInt(7, card.getPosition());
+            return ps;
+        }, keyHolder);
+
+        // Retrieve the generated ID
+        long generatedId = keyHolder.getKey().intValue();
+
+        // Fetch the complete object from the database
+        return findById(generatedId).orElseThrow(() -> new Exception("Error creating card. Could not load new card from database"));
     }
     
     public List<BBCard> findAll() {
-        String sql = SELECT_CLAUSE;
+        String sql = SELECT_CLAUSE+ORDER_BY;
         return jdbcTemplate.query(sql, (rs, rowNum) ->                                
             new BBCard(
                 rs.getLong("id"),                         
@@ -54,10 +80,6 @@ public class CardRepository {
         String sql = SELECT_CLAUSE + WHERE_ID;
         try {
             BBCard card = jdbcTemplate.queryForObject(sql, new Object[]{id}, cardRowMapper());
-            
-            //get datatime
-            
-            
             return Optional.of(card); // Wrap the result in Optional
         } catch (EmptyResultDataAccessException e) {
             System.out.println("No card found with id: " + id);
@@ -65,27 +87,10 @@ public class CardRepository {
         }
     }
     
-    public void gettime(){
-        String sql = "SELECT created FROM cards";
-    
-        jdbcTemplate.query(sql, resultSet -> {
-            try {
-                if (resultSet.next()) {
-                    Timestamp timestamp = resultSet.getTimestamp("created");
-                    LocalDateTime localDateTime = timestamp.toLocalDateTime();
-                    System.out.println("LocalDateTime: " + localDateTime);
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(CardRepository.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-    }
-    
     public Optional<List<BBCard>> findByListId(Long listId) 
     {
-        System.out.println("findByListId");
         String sql = SELECT_CLAUSE + " WHERE list_id = ?";
-
+        
         try {
             List<BBCard> cards = jdbcTemplate.query(sql, new Object[]{listId}, // Pass the parameter value for the placeholder
                     (rs, rowNum) -> new BBCard(
@@ -102,7 +107,6 @@ public class CardRepository {
                     ));
             return Optional.of(cards); // Wrap the result in Optional
         } catch (EmptyResultDataAccessException e) {
-            System.out.println("No card found with list_id: " + listId);
             return Optional.empty(); // Return an empty Optional if no result is found
         }
     }
@@ -136,7 +140,6 @@ public class CardRepository {
                 + "position = ?, "
                 + "updated = CURRENT_TIMESTAMP "
                 + WHERE_ID;    
-        System.out.println(sql);
         return jdbcTemplate.update(sql, e.getUserId(), e.getListId(), e.getDescription(), e.getTitle(), e.getColor(), e.getType(), e.getPosition(), e.getId());
     }
     

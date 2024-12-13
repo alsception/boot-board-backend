@@ -18,6 +18,7 @@ public class ListRepository {
     private static final String TABLE_NAME = "lists ";
     private static final String SELECT_CLAUSE = "SELECT * FROM "+TABLE_NAME;
     private static final String WHERE_ID = " WHERE id = ?";
+    private static final String ORDER_BY = " ORDER BY CASE WHEN `position` > 0 THEN 0 ELSE 1 END ASC, `position` ASC, `id` ASC";
     
     @Autowired
     private CardRepository cardRepository;
@@ -88,7 +89,7 @@ public class ListRepository {
     
     public Optional<List<BBList>> findAll() 
     {
-        String sql = SELECT_CLAUSE;
+        String sql = SELECT_CLAUSE + ORDER_BY;
         List<BBList> clc = jdbcTemplate.query(sql, (rs, rowNum) ->                                
             new BBList(
                 rs.getLong("id"),                         

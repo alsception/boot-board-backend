@@ -17,18 +17,11 @@ public class CardsController {
     private CardRepository repository;
     
     @PostMapping
-    public String create(@RequestBody BBCard entry) throws BadRequestException 
+    public BBCard create(@RequestBody BBCard entry) throws BadRequestException 
     {
-        int result = 0;
         try
         {
-            result = repository.create(entry);
-            
-            if(result>0){
-                return "Card created";
-            }else{
-                return "Error creating card";
-            }
+            return repository.create(entry);            
         }
         catch(Exception ex)
         {
