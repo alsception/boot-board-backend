@@ -22,7 +22,7 @@ public class BBBoard implements Serializable
     private LocalDateTime created;
     private LocalDateTime updated;
     
-    private List<List> lists;
+    private List<BBList> lists;
     
     public BBBoard(Long id){
         this.id = id;
@@ -41,13 +41,13 @@ public class BBBoard implements Serializable
     public BBBoard(
             @JsonProperty("id") Long id, 
             @JsonProperty("userId") Long userId, 
-            @JsonProperty("boardId") Long boardId, 
             @JsonProperty("title") String title, 
             @JsonProperty("color") String color, 
             @JsonProperty("type") String type, 
             @JsonProperty("position") int position,
             @JsonProperty("created") LocalDateTime created,
-            @JsonProperty("updated") LocalDateTime updated)
+            @JsonProperty("updated") LocalDateTime updated,
+            @JsonProperty("lists") List<BBList> lists)
     {
         this.id = id;
         this.userId = userId;
@@ -57,5 +57,6 @@ public class BBBoard implements Serializable
         this.position = position;        
         this.created = created;
         this.updated = updated;      
+        this.lists = this.lists;
     }
 }

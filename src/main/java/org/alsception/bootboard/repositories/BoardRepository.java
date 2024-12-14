@@ -9,46 +9,48 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
+import org.alsception.bootboard.entities.BBBoard;
 import org.alsception.bootboard.entities.BBList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 @Repository
-public class ListRepository {
+public class BoardRepository {
 
     private final JdbcTemplate jdbcTemplate;
     
-    private static final String TABLE_NAME = "lists ";
-    private static final String SELECT_CLAUSE = "SELECT * FROM "+TABLE_NAME;
-    private static final String WHERE_ID = " WHERE id = ?";
+    private static final String TABLE_NAME = "`boards`";
+    private static final String SELECT_CLAUSE = "SELECT * FROM "+TABLE_NAME+ " ";
+    private static final String WHERE_ID = " WHERE `id` = ?";
     private static final String ORDER_BY = " ORDER BY CASE WHEN `position` > 0 THEN 0 ELSE 1 END ASC, `position` ASC, `id` ASC";
     
     @Autowired
     private CardRepository cardRepository;
+    
+    @Autowired
+    private ListRepository listRepository;
 
-    public ListRepository(JdbcTemplate jdbcTemplate) {
+    public BoardRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }   
 
-    public BBList create(BBList list) throws Exception
+    public BBBoard create(BBBoard board) throws Exception
     {
-        String sql = "INSERT INTO " + TABLE_NAME + " (user_id, board_id, title, color, type, position) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO " + TABLE_NAME + " (user_id, title, color, type, position) VALUES (?, ?, ?, ?, ?)";
         System.out.println(sql);        
         // Using KeyHolder to capture the generated key
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setLong(1, list.getUserId());
-            ps.setLong(2, list.getBoardId());
-            ps.setString(3, list.getTitle());
-            ps.setString(4, list.getColor().toLowerCase());
-            ps.setString(5, list.getType());
-            ps.setInt(6, list.getPosition());
+            ps.setLong(1, board.getUserId());
+            ps.setString(2, board.getTitle());
+            ps.setString(3, board.getColor().toLowerCase());
+            ps.setString(4, board.getType());
+            ps.setInt(5, board.getPosition());
             return ps;
         }, keyHolder);
 
@@ -56,24 +58,24 @@ public class ListRepository {
         long generatedId = keyHolder.getKey().longValue();
 
         // Fetch the complete object from the database
-        BBList createdList = findById(generatedId).orElseThrow(() -> new Exception("Error creating list. Could not load new card from database ERR60"));
+        BBBoard createdBoard = findById(generatedId).orElseThrow(() -> new Exception("Error creating board. Could not load new board from database ERR60"));
 
-        addCards(createdList);
+        //addCards(createdBoard);
         
         //again, with cards, if requested
-        if(createdList.getType().startsWith("ADD")){
-            createdList = findById(generatedId).orElseThrow(() -> new Exception("Error creating list. Could not load new card from database ERR66"));
+        if(createdBoard.getType().startsWith("ADD")){
+            //createdBoard = findById(generatedId).orElseThrow(() -> new Exception("Error creating board. Could not load new card from database ERR66"));
         }
         
-        return createdList;
+        return createdBoard;
         
     }
 
-    private void addCards(BBList createdList) {
+    private void addCards(BBBoard createdBoard) {
         //now if requested by client:
         //create n cards.
 
-        String type = createdList.getType();
+        String type = createdBoard.getType();
         if( null != type && !"".equals(type))
         {
             if(type.startsWith("ADD_CARDS")){
@@ -94,9 +96,9 @@ public class ListRepository {
                             System.out.println("Creating card "+i);
                             BBCard card = new BBCard();
                             //card.setId(rs.getLong("id"));
-                            card.setListId(createdList.getId());
-                            card.setUserId(createdList.getUserId());
-                            card.setTitle(createdList.getTitle());
+//                            card.setListId(createdList.getId());
+//                            card.setUserId(createdList.getUserId());
+//                            card.setTitle(createdList.getTitle());
                             card.setDescription("Description");
                             card.setColor("color");
                             card.setType("type");
@@ -151,42 +153,42 @@ public class ListRepository {
         return hmParameters;
     }
     
-    //1. Load list without cards
-    public Optional<BBList> findById(Long id) {
+    //1. Load board without lists
+    public Optional<BBBoard> findById(Long id) {
         String sql = SELECT_CLAUSE + WHERE_ID;
         try {
-            BBList clist = jdbcTemplate.queryForObject(sql, new Object[]{id}, clistRowMapper());
-            return Optional.of(clist); // Wrap the result in Optional
+            BBBoard cboard = jdbcTemplate.queryForObject(sql, new Object[]{id}, cboardRowMapper());
+            return Optional.of(cboard); // Wrap the result in Optional
         } catch (EmptyResultDataAccessException e) {
-            System.out.println("No card list found with id: " + id);
+            System.out.println("No card board found with id: " + id);
             return Optional.empty(); // Return an empty Optional if no result is found
         }
     }
     
-    //2. Load list with cards
-    public Optional<BBList> findByIdWithCards(Long id) 
-    {
-        Optional<BBList> cardList = this.findById(id);
-        
-        if(cardList.isPresent())
-        {
-            try{
-                Optional<List<BBCard>> cards = this.cardRepository.findByListId(id);
-                if(cards.isPresent())
-                {
-                    cardList.get().setCards(cards.get());
-                }
-            }catch(Exception e){
-                System.out.println("Error loading cards for list "+id);
-                e.printStackTrace();
-            }            
-        }
-        return cardList;
-    }    
-    
+    //2. Load board with lists -- todo: fix
+//    public Optional<BBBoard> findByIdWithCards(Long id) 
+//    {
+//        Optional<BBBoard> cardBoard = this.findById(id);
+//        
+//        if(cardBoard.isPresent())
+//        {
+//            try{
+//                //Optional<List<BBCard>> cards = this.cardRepository.findByBoardId(id);
+//                if(cards.isPresent())
+//                {
+//                   // cardBoard.get().setCards(cards.get());
+//                }
+//            }catch(Exception e){
+//                System.out.println("Error loading cards for board "+id);
+//                e.printStackTrace();
+//            }            
+//        }
+//        return cardBoard;
+//    }    
+//    
     public List<BBCard> findCardsForList(Long id) 
     {
-        Optional<BBList> cardList = this.findById(id);
+        Optional<BBList> cardList = null;//this.findById(id);
         
         if(cardList.isPresent())
         {
@@ -205,14 +207,33 @@ public class ListRepository {
         return null;
     }    
     
-    public Optional<List<BBList>> findAll() 
+    public Optional<BBBoard> findByIdWithLists(Long id) 
+    {
+        Optional<BBBoard> board = this.findById(id);
+        
+        if(board.isPresent())
+        {
+            try{
+                Optional<List<BBList>> lists = this.listRepository.findByBoardId(id);
+                if(lists.isPresent())
+                {
+                    board.get().setLists(lists.get());
+                }
+            }catch(Exception e){
+                System.out.println("Error loading lists for board "+id);
+                e.printStackTrace();
+            }            
+        }
+        return board;
+    }    
+    
+    public Optional<List<BBBoard>> findAll() 
     {
         String sql = SELECT_CLAUSE + ORDER_BY;
-        List<BBList> clc = jdbcTemplate.query(sql, (rs, rowNum) ->                                
-            new BBList(
+        List<BBBoard> clc = jdbcTemplate.query(sql, (rs, rowNum) ->                                
+            new BBBoard(
                 rs.getLong("id"),                         
                 rs.getLong("user_id"),                         
-                rs.getLong("board_id"),                         
                 rs.getString("title"),    
                 rs.getString("color"),
                 rs.getString("type"), 
@@ -223,70 +244,45 @@ public class ListRepository {
             ));
         return Optional.ofNullable(clc);
     }
+//        
+//    public List<BBList> findAllWithCards() {
+//        Optional<List<BBList>> cardList = this.findAll();
+//        if(cardList.isPresent())
+//        {
+//            cardList.get().forEach(cl -> {
+//                List<BBCard> cards = findCardsForList(cl.getId());
+//                cl.setCards(cards);
+//            });
+//        }
+//        return cardList.get();
+//    }    
     
-    public Optional<List<BBList>> findByBoardId(Long boardId) 
-    {
-        String sql = SELECT_CLAUSE + " WHERE board_id = ?";
-        
-        try {
-            List<BBList> lists = jdbcTemplate.query(sql, new Object[]{boardId}, 
-                    (rs, rowNum) -> new BBList(
-                        rs.getLong("id"),
-                        rs.getLong("user_id"),
-                        rs.getLong("board_id"),
-                        rs.getString("title"),
-                        rs.getString("color"),
-                        rs.getString("type"),
-                        rs.getInt("position"),
-                        rs.getTimestamp("created").toLocalDateTime(),
-                        rs.getTimestamp("updated").toLocalDateTime(),
-                        null
-                    ));
-            return Optional.of(lists); // Wrap the result in Optional
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty(); // Return an empty Optional if no result is found
-        }
-    }
-        
-    public List<BBList> findAllWithCards() {
-        Optional<List<BBList>> cardList = this.findAll();
-        if(cardList.isPresent())
-        {
-            cardList.get().forEach(cl -> {
-                List<BBCard> cards = findCardsForList(cl.getId());
-                cl.setCards(cards);
-            });
-        }
-        return cardList.get();
-    }        
     
     // RowMapper to map result set to BBCard object
-    private RowMapper<BBList> clistRowMapper() {
+    private RowMapper<BBBoard> cboardRowMapper() {
         return (rs, rowNum) -> {
-            BBList clist = new BBList();
-            clist.setId(rs.getLong("id"));
-            clist.setBoardId(rs.getLong("board_id"));
-            clist.setUserId(rs.getLong("user_id"));
-            clist.setTitle(rs.getString("title"));
-            clist.setColor(rs.getString("color"));
-            clist.setType(rs.getString("type"));
-            clist.setPosition(rs.getInt("position"));
-            return clist;
+            BBBoard cboard = new BBBoard();
+            cboard.setId(rs.getLong("id"));
+            cboard.setUserId(rs.getLong("user_id"));
+            cboard.setTitle(rs.getString("title"));
+            cboard.setColor(rs.getString("color"));
+            cboard.setType(rs.getString("type"));
+            cboard.setPosition(rs.getInt("position"));
+            return cboard;
         };
     }
     
-    // Method to update an clist by ID
-    public int update(BBList e) {
+    // Method to update an cboard by ID
+    public int update(BBBoard e) {
         String sql = "UPDATE " + TABLE_NAME + " SET "
                 + "user_id = ?, "
-                + "board_id = ?, "
                 + "title = ?, "
                 + "color = ?, "
                 + "type = ?, "
                 + "position = ?, "
                 + "updated_at = CURRENT_TIMESTAMP "
                 + WHERE_ID;        
-        return jdbcTemplate.update(sql, e.getUserId(), e.getBoardId(), e.getTitle(), e.getColor(), e.getType(), e.getPosition(), e.getId());
+        return jdbcTemplate.update(sql, e.getUserId(), e.getTitle(), e.getColor(), e.getType(), e.getPosition(), e.getId());
     }
     
     //This can be generalized

@@ -2,26 +2,26 @@ package org.alsception.bootboard.controllers;
 
 import java.util.List;
 import java.util.Optional;
-import org.alsception.bootboard.entities.BBList;
+import org.alsception.bootboard.entities.BBBoard;
 import org.alsception.bootboard.error.BadRequestException;
-import org.alsception.bootboard.repositories.ListRepository;
+import org.alsception.bootboard.repositories.BoardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/lists")
+@RequestMapping("/api/v1/boards")
 @CrossOrigin(origins = "*")//or 4200 for dev
-public class ListsController {
+public class BoardsController {
 
     @Autowired
-    private ListRepository listRepository;
+    private BoardRepository repository;
     
     @PostMapping
-    public BBList create(@RequestBody BBList entry) throws BadRequestException 
+    public BBBoard create(@RequestBody BBBoard entry) throws BadRequestException 
     {
         try
         {
-            return listRepository.create(entry);            
+            return repository.create(entry);            
         }
         catch(Exception ex)
         {
@@ -31,41 +31,42 @@ public class ListsController {
     }
 
     @GetMapping("/{id}")
-    public Optional<BBList> get(@PathVariable Long id) 
+    public Optional<BBBoard> get(@PathVariable Long id) 
     {
-        return listRepository.findById(id);
+        return repository.findById(id);
     }
     
-    @GetMapping("/{id}/cards")
-    public Optional<BBList> getWithCards(@PathVariable Long id) 
+    @GetMapping("/{id}/lists")
+    public Optional<BBBoard> getWithLists(@PathVariable Long id) 
     {
-        return listRepository.findByIdWithCards(id);
+        return repository.findByIdWithLists(id);
     }
     
     @GetMapping()
-    public Optional<List<BBList>> getAll() 
+    public Optional<List<BBBoard>> getAll() 
     {
-        return listRepository.findAll();
+        return repository.findAll();
     }
     
-    @GetMapping("/cards")
-    public List<BBList> getAllWithCards() 
+    @GetMapping("/lists")
+    public /*List<BBBoard>*/void getAllWithLists() 
     {
-        return listRepository.findAllWithCards();
+        System.out.println("get all with lists");
+        //return repository.findAllWithCards();
     }
     
     //TODO: search by text and pagination
     
     @PutMapping("/{id}")
-    public Optional<BBList> update(@PathVariable Long id, @RequestBody BBList list) 
+    public Optional<BBBoard> update(@PathVariable Long id, @RequestBody BBBoard list) 
     {
         if(id!=list.getId()){
             throw new BadRequestException("Wrong id");
         }
         try
         {
-            listRepository.update(list);
-            return listRepository.findById(id);
+            repository.update(list);
+            return repository.findById(id);
         }
         catch(Exception ex)
         {
@@ -78,11 +79,11 @@ public class ListsController {
     {
         try
         {
-            int result = listRepository.delete(id);
+            int result = repository.delete(id);
             if(result == 1)
-                return "List deleted";
+                return "Board deleted";
             else 
-                return "No list found";
+                return "No board found";
         }
         catch(Exception ex)
         {
