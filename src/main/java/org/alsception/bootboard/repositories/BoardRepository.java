@@ -1,7 +1,9 @@
 package org.alsception.bootboard.repositories;
 
+import org.alsception.bootboard.utils.UniqueIdGenerator;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import org.alsception.bootboard.entities.BBCard;
@@ -22,10 +24,10 @@ public class BoardRepository {
 
     private final JdbcTemplate jdbcTemplate;
     
-    private static final String TABLE_NAME = "`boards`";
+    private static final String TABLE_NAME = "boards";
     private static final String SELECT_CLAUSE = "SELECT * FROM "+TABLE_NAME+ " ";
-    private static final String WHERE_ID = " WHERE `id` = ?";
-    private static final String ORDER_BY = " ORDER BY CASE WHEN `position` > 0 THEN 0 ELSE 1 END ASC, `position` ASC, `id` ASC";
+    private static final String WHERE_ID = " WHERE id = ?";
+    private static final String ORDER_BY = " ORDER BY CASE WHEN position > 0 THEN 0 ELSE 1 END ASC, position ASC, id ASC";
     
     @Autowired
     private CardRepository cardRepository;
@@ -39,26 +41,26 @@ public class BoardRepository {
 
     public BBBoard create(BBBoard board) throws Exception
     {
-        String sql = "INSERT INTO " + TABLE_NAME + " (user_id, title, color, type, position) VALUES (?, ?, ?, ?, ?)";
+        board.setId(UniqueIdGenerator.generateNanoId());
+        String sql = "INSERT INTO " + TABLE_NAME + " (id, user_id, title, color, type, position, created) VALUES (?, ?, ?, ?, ?, ?, ?)";
         System.out.println(sql);        
         // Using KeyHolder to capture the generated key
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setLong(1, board.getUserId());
-            ps.setString(2, board.getTitle());
-            ps.setString(3, board.getColor().toLowerCase());
-            ps.setString(4, board.getType());
-            ps.setInt(5, board.getPosition());
+            ps.setLong(1, board.getId());
+            ps.setLong(2, board.getUserId());
+            ps.setString(3, board.getTitle());
+            ps.setString(4, board.getColor().toLowerCase());
+            ps.setString(5, board.getType());
+            ps.setInt(6, board.getPosition());
+            ps.setTimestamp(7,  new Timestamp(System.currentTimeMillis()));
             return ps;
         }, keyHolder);
-
-        // Retrieve the generated ID
-        long generatedId = keyHolder.getKey().longValue();
-
+        
         // Fetch the complete object from the database
-        BBBoard createdBoard = findById(generatedId).orElseThrow(() -> new Exception("Error creating board. Could not load new board from database ERR60"));
+        BBBoard createdBoard = findById(board.getId()).orElseThrow(() -> new Exception("Error creating board. Could not load new board from database ERR60"));
 
         //addCards(createdBoard);
         
@@ -67,8 +69,7 @@ public class BoardRepository {
             //createdBoard = findById(generatedId).orElseThrow(() -> new Exception("Error creating board. Could not load new card from database ERR66"));
         }
         
-        return createdBoard;
-        
+        return createdBoard;        
     }
 
     private void addCards(BBBoard createdBoard) {

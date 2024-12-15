@@ -1,5 +1,6 @@
 package org.alsception.bootboard.repositories;
 
+import org.alsception.bootboard.utils.UniqueIdGenerator;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.LocalDateTime;
@@ -25,7 +26,7 @@ public class ListRepository {
     private static final String TABLE_NAME = "lists ";
     private static final String SELECT_CLAUSE = "SELECT * FROM "+TABLE_NAME;
     private static final String WHERE_ID = " WHERE id = ?";
-    private static final String ORDER_BY = " ORDER BY CASE WHEN `position` > 0 THEN 0 ELSE 1 END ASC, `position` ASC, `id` ASC";
+    private static final String ORDER_BY = " ORDER BY CASE WHEN position` > 0 THEN 0 ELSE 1 END ASC, `position` ASC, `id` ASC";
     
     @Autowired
     private CardRepository cardRepository;
@@ -36,8 +37,12 @@ public class ListRepository {
 
     public BBList create(BBList list) throws Exception
     {
-        String sql = "INSERT INTO " + TABLE_NAME + " (user_id, board_id, title, color, type, position) VALUES (?, ?, ?, ?, ?, ?)";
+        list.setId(UniqueIdGenerator.generateNanoId());
+        
+        String sql = "INSERT INTO " + TABLE_NAME + " (user_id, board_id, title, color, type, position, id) VALUES (?, ?, ?, ?, ?, ?, ?)";
         System.out.println(sql);        
+        
+        // TODO see card repository
         // Using KeyHolder to capture the generated key
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -49,20 +54,18 @@ public class ListRepository {
             ps.setString(4, list.getColor().toLowerCase());
             ps.setString(5, list.getType());
             ps.setInt(6, list.getPosition());
+            ps.setLong(7, list.getId());
             return ps;
         }, keyHolder);
 
-        // Retrieve the generated ID
-        long generatedId = keyHolder.getKey().longValue();
-
         // Fetch the complete object from the database
-        BBList createdList = findById(generatedId).orElseThrow(() -> new Exception("Error creating list. Could not load new card from database ERR60"));
+        BBList createdList = findById(list.getId()).orElseThrow(() -> new Exception("Error creating list. Could not load new card from database ERR60"));
 
         addCards(createdList);
         
         //again, with cards, if requested
         if(null!=createdList.getType() && createdList.getType().startsWith("ADD")){
-            createdList = findById(generatedId).orElseThrow(() -> new Exception("Error creating list. Could not load new card from database ERR66"));
+            createdList = findById(list.getId()).orElseThrow(() -> new Exception("Error creating list. Could not load new card from database ERR66"));
         }
         
         return createdList;

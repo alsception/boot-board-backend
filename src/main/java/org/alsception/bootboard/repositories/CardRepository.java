@@ -1,5 +1,6 @@
 package org.alsception.bootboard.repositories;
 
+import org.alsception.bootboard.utils.UniqueIdGenerator;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,9 +25,9 @@ public class CardRepository {
     private final JdbcTemplate jdbcTemplate;
     
     private static final String TABLE_NAME = "cards";
-    private static final String SELECT_CLAUSE = "SELECT * FROM `"+TABLE_NAME+"`";
-    private static final String WHERE_ID = " WHERE `id` = ?";
-    private static final String ORDER_BY = " ORDER BY CASE WHEN `position` > 0 THEN 0 ELSE 1 END ASC, `position` ASC, `updated` ASC, `id` ASC";
+    private static final String SELECT_CLAUSE = "SELECT * FROM "+TABLE_NAME+"";
+    private static final String WHERE_ID = " WHERE id = ?";
+    private static final String ORDER_BY = " ORDER BY CASE WHEN position > 0 THEN 0 ELSE 1 END ASC, position ASC, updated ASC, id ASC";
     
     public CardRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -34,10 +35,14 @@ public class CardRepository {
 
     public BBCard create(BBCard card) throws Exception
     {
-        String sql = "INSERT INTO " + TABLE_NAME + " (user_id, list_id, title, description, color, type, position) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        card.setId(UniqueIdGenerator.generateNanoId());
+
+        String sql = "INSERT INTO " + TABLE_NAME + " (user_id, list_id, title, description, color, type, position, id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         System.out.println(sql);
 
-        // Using KeyHolder to capture the generated key
+        // TODO - remove this KeyHolder and RETURN_GENERATED_KEYS because we will generate id in java
+        
+        // Using KeyHolder to capture the generated key        
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -49,14 +54,12 @@ public class CardRepository {
             ps.setString(5, card.getColor());
             ps.setString(6, card.getType());
             ps.setInt(7, card.getPosition());
+            ps.setLong(8, card.getId().longValue());
             return ps;
         }, keyHolder);
-
-        // Retrieve the generated ID
-        long generatedId = keyHolder.getKey().longValue();
         
         // Fetch the complete object from the database
-        return findById(generatedId).orElseThrow(() -> new Exception("Error creating card. Could not load new card from database ERR59"));
+        return findById(card.getId()).orElseThrow(() -> new Exception("Error creating card. Could not load new card from database ERR59"));
     }
     
     public List<BBCard> findAll() {
