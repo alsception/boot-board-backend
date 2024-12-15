@@ -63,7 +63,7 @@ public class BoardRepository {
         //addCards(createdBoard);
         
         //again, with cards, if requested
-        if(createdBoard.getType().startsWith("ADD")){
+        if(null!=createdBoard.getType() && createdBoard.getType().startsWith("ADD")){
             //createdBoard = findById(generatedId).orElseThrow(() -> new Exception("Error creating board. Could not load new card from database ERR66"));
         }
         
@@ -120,7 +120,7 @@ public class BoardRepository {
         HashMap<String,Object> hmParameters = new HashMap<>();
         
         // Ensure string starts with "ADD"
-        if (input.startsWith("ADD")) {
+        if (input != null && input.startsWith("ADD")) {
             // Updated regex to match space-separated parts
             String regex = "(?:CARDS (\\d+))?(?: DESCRIPTION ([^ ]+))?(?: COLOR ([^ ]+))?(?: TYPE (\\w+))?";
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);

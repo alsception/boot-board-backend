@@ -61,7 +61,7 @@ public class ListRepository {
         addCards(createdList);
         
         //again, with cards, if requested
-        if(createdList.getType().startsWith("ADD")){
+        if(null!=createdList.getType() && createdList.getType().startsWith("ADD")){
             createdList = findById(generatedId).orElseThrow(() -> new Exception("Error creating list. Could not load new card from database ERR66"));
         }
         
@@ -118,7 +118,7 @@ public class ListRepository {
         HashMap<String,Object> hmParameters = new HashMap<>();
         
         // Ensure string starts with "ADD"
-        if (input.startsWith("ADD")) {
+        if (input != null && input.startsWith("ADD")) {
             // Updated regex to match space-separated parts
             String regex = "(?:CARDS (\\d+))?(?: DESCRIPTION ([^ ]+))?(?: COLOR ([^ ]+))?(?: TYPE (\\w+))?";
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
