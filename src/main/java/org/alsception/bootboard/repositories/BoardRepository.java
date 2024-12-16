@@ -215,8 +215,9 @@ public class BoardRepository {
                 rs.getString("type"), 
                 rs.getInt("position"),
                 rs.getTimestamp("created").toLocalDateTime(),
-                rs.getTimestamp("updated").toLocalDateTime(),
-                null
+                rs.getTimestamp("updated").toLocalDateTime(),                
+                null,
+                0l,0l
             ));
         return Optional.ofNullable(clc);
     }    

@@ -159,4 +159,13 @@ public class CardRepository {
         return jdbcTemplate.update(sql, cardId);
     }
     
+    public int getTotalCardsForList(Long listId) {          
+        // SQL query to count the rows where parent_id matches the cardId
+        String sql = "SELECT COUNT(*) FROM " + TABLE_NAME + " WHERE list_id = ?";
+
+        // Execute the query and retrieve the count
+        return jdbcTemplate.queryForObject(sql, new Object[]{listId}, Integer.class);
+    }
+
+    
 }

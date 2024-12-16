@@ -177,6 +177,8 @@ public class ListRepository {
                 if(cards.isPresent())
                 {
                     cardList.get().setCards(cards.get());
+                    System.out.println("total cars: "+this.cardRepository.getTotalCardsForList(id));
+                    cardList.get().setTotalCards(cards.get().size());
                 }
             }catch(Exception e){
                 System.out.println("Error loading cards for list "+id);
@@ -221,7 +223,7 @@ public class ListRepository {
                 rs.getInt("position"),
                 rs.getTimestamp("created").toLocalDateTime(),
                 rs.getTimestamp("updated").toLocalDateTime(),
-                null
+                null, 0l
             ));
         return Optional.ofNullable(clc);
     }
@@ -242,7 +244,7 @@ public class ListRepository {
                         rs.getInt("position"),
                         rs.getTimestamp("created").toLocalDateTime(),
                         rs.getTimestamp("updated").toLocalDateTime(),
-                        null
+                        null, 0l
                     ));
             return Optional.of(lists); // Wrap the result in Optional
         } catch (EmptyResultDataAccessException e) {

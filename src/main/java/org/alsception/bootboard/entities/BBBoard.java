@@ -24,6 +24,9 @@ public class BBBoard implements Serializable
     
     private List<BBList> lists;
     
+    private long totalCards = 0l;
+    private long totalLists = 0l;
+    
     public BBBoard(Long id){
         this.id = id;
     }
@@ -47,7 +50,10 @@ public class BBBoard implements Serializable
             @JsonProperty("position") int position,
             @JsonProperty("created") LocalDateTime created,
             @JsonProperty("updated") LocalDateTime updated,
-            @JsonProperty("lists") List<BBList> lists)
+            @JsonProperty("lists") List<BBList> lists,
+            @JsonProperty("totalCards") long totalCards, 
+            @JsonProperty("totalLists") long totalLists
+            )
     {
         this.id = id;
         this.userId = userId;
@@ -57,6 +63,8 @@ public class BBBoard implements Serializable
         this.position = position;        
         this.created = created;
         this.updated = updated;      
-        this.lists = this.lists;
+        this.lists = lists;
+        this.totalCards = totalCards;
+        this.totalLists = totalLists;
     }
 }

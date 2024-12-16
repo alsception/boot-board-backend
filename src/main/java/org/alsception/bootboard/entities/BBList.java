@@ -25,6 +25,8 @@ public class BBList implements Serializable
     private LocalDateTime updated;
     
     private List<BBCard> cards;
+    
+    private long totalCards = 0l;
         
     public BBList(Long id){
         this.id = id;
@@ -50,7 +52,8 @@ public class BBList implements Serializable
             @JsonProperty("position") int position,
             @JsonProperty("created") LocalDateTime created,
             @JsonProperty("updated") LocalDateTime updated,
-            @JsonProperty("cards") List<BBCard> cards)
+            @JsonProperty("cards") List<BBCard> cards,
+            @JsonProperty("totalCards") long totalCards)
     {
         this.id = id;
         this.userId = userId;
@@ -62,5 +65,6 @@ public class BBList implements Serializable
         this.created = created;
         this.updated = updated;   
         this.cards = cards;
+        this.totalCards = totalCards;
     }    
 }
