@@ -96,10 +96,6 @@ public class BoardRepository {
                             //create card.
                             System.out.println("Creating card "+i);
                             BBCard card = new BBCard();
-                            //card.setId(rs.getLong("id"));
-//                            card.setListId(createdList.getId());
-//                            card.setUserId(createdList.getUserId());
-//                            card.setTitle(createdList.getTitle());
                             card.setDescription("Description");
                             card.setColor("color");
                             card.setType("type");
@@ -140,10 +136,10 @@ public class BoardRepository {
                 hmParameters.put("type", type);
 
                 // Print the extracted parts, handling nulls
-                System.out.println("Number after 'CARDS': " + (number != null ? number : "Not present"));
+                /*System.out.println("Number after 'CARDS': " + (number != null ? number : "Not present"));
                 System.out.println("Description: " + (description != null ? description : "Not present"));
                 System.out.println("Color: " + (color != null ? color : "Not present"));
-                System.out.println("Type: " + (type != null ? type : "Not present"));
+                System.out.println("Type: " + (type != null ? type : "Not present"));*/
             } else {
                 System.out.println("No match found.");
             }
@@ -166,27 +162,6 @@ public class BoardRepository {
         }
     }
     
-    //2. Load board with lists -- todo: fix
-//    public Optional<BBBoard> findByIdWithCards(Long id) 
-//    {
-//        Optional<BBBoard> cardBoard = this.findById(id);
-//        
-//        if(cardBoard.isPresent())
-//        {
-//            try{
-//                //Optional<List<BBCard>> cards = this.cardRepository.findByBoardId(id);
-//                if(cards.isPresent())
-//                {
-//                   // cardBoard.get().setCards(cards.get());
-//                }
-//            }catch(Exception e){
-//                System.out.println("Error loading cards for board "+id);
-//                e.printStackTrace();
-//            }            
-//        }
-//        return cardBoard;
-//    }    
-//    
     public List<BBCard> findCardsForList(Long id) 
     {
         Optional<BBList> cardList = null;//this.findById(id);
@@ -244,20 +219,7 @@ public class BoardRepository {
                 null
             ));
         return Optional.ofNullable(clc);
-    }
-//        
-//    public List<BBList> findAllWithCards() {
-//        Optional<List<BBList>> cardList = this.findAll();
-//        if(cardList.isPresent())
-//        {
-//            cardList.get().forEach(cl -> {
-//                List<BBCard> cards = findCardsForList(cl.getId());
-//                cl.setCards(cards);
-//            });
-//        }
-//        return cardList.get();
-//    }    
-    
+    }    
     
     // RowMapper to map result set to BBCard object
     private RowMapper<BBBoard> cboardRowMapper() {
@@ -281,15 +243,20 @@ public class BoardRepository {
                 + "color = ?, "
                 + "type = ?, "
                 + "position = ?, "
-                + "updated_at = CURRENT_TIMESTAMP "
+                + "updated = CURRENT_TIMESTAMP "
                 + WHERE_ID;        
         return jdbcTemplate.update(sql, e.getUserId(), e.getTitle(), e.getColor(), e.getType(), e.getPosition(), e.getId());
     }
     
     //This can be generalized
-    public int delete(Long id) {
-        String sql = "DELETE FROM " + TABLE_NAME + WHERE_ID;
-        return jdbcTemplate.update(sql, id);
+    public int delete(Long id) 
+    {        
+        // when deleting board, delete also all child elements (list and card)
+        int deletedChildren = this.listRepository.deleteListsForBoard(id);        
+        
+        String sql = "DELETE FROM " + TABLE_NAME + WHERE_ID;        
+         
+        return deletedChildren + jdbcTemplate.update(sql, id);
     }
     
 }

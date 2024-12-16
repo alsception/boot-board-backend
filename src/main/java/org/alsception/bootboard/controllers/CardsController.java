@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/cards")
-//@CrossOrigin(origins = "*")//or 4200 for dev
 public class CardsController {
 
     @Autowired
@@ -48,7 +47,7 @@ public class CardsController {
     public Optional<BBCard> update(@RequestBody BBCard card) 
     {
         if(card==null)
-            System.out.println("card is null...");
+            System.out.println("card is null.");
         
         if(null==card.getId()){
             throw new BadRequestException("Missing id");
@@ -80,8 +79,6 @@ public class CardsController {
             System.out.println(ex.getMessage());
             throw new BadRequestException(ex.getMessage());
         }  
-    }
-    
-    
+    }  
     
 }

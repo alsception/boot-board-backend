@@ -2,7 +2,6 @@ package org.alsception.bootboard.controllers;
 
 import java.util.List;
 import java.util.Optional;
-import org.alsception.bootboard.entities.BBCard;
 import org.alsception.bootboard.entities.BBList;
 import org.alsception.bootboard.error.BadRequestException;
 import org.alsception.bootboard.repositories.ListRepository;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/lists")
-//@CrossOrigin(origins = "http://localhost:4200/boot-board-front") // Allow specific origin
 public class ListsController {
 
     @Autowired
@@ -87,8 +85,8 @@ public class ListsController {
         try
         {
             int result = listRepository.delete(id);
-            if(result == 1)
-                return "List deleted";
+            if(result >= 1)
+                return "Deleted list + "+(result-1)+" cards";
             else 
                 return "No list found";
         }

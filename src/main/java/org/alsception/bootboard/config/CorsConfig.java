@@ -1,5 +1,5 @@
 
-package org.alsception.bootboard.controllers;
+package org.alsception.bootboard.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

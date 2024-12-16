@@ -3,7 +3,6 @@ package org.alsception.bootboard.repositories;
 import org.alsception.bootboard.utils.UniqueIdGenerator;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import org.alsception.bootboard.entities.BBCard;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import org.alsception.bootboard.entities.BBList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -26,6 +24,7 @@ public class ListRepository {
     private static final String TABLE_NAME = "lists ";
     private static final String SELECT_CLAUSE = "SELECT * FROM "+TABLE_NAME;
     private static final String WHERE_ID = " WHERE id = ?";
+    private static final String WHERE_PARENT_ID = "WHERE board_id = ?";
     private static final String ORDER_BY = " ORDER BY CASE WHEN position` > 0 THEN 0 ELSE 1 END ASC, `position` ASC, `id` ASC";
     
     @Autowired
@@ -292,9 +291,43 @@ public class ListRepository {
     }
     
     //This can be generalized
-    public int delete(Long id) {
+    public int delete(Long id) 
+    {
+        
+        //First delete children cards:
+        Optional<BBList> list = findById(id);
+
+        int counter = 0;
+
+        //Then delete children
+        if (list.isPresent()) {
+            counter += cardRepository.deleteForList(id);
+        }
+
+        //finally, delete board
         String sql = "DELETE FROM " + TABLE_NAME + WHERE_ID;
-        return jdbcTemplate.update(sql, id);
+        return counter += jdbcTemplate.update(sql, id);
+    }
+    
+    //This function deletes child lists for parent board
+    public int deleteListsForBoard(Long boardId) 
+    { 
+        //First get children lists:
+        Optional<List<BBList>> childLists = findByBoardId(boardId);
+
+        int counter = 0;
+
+        //Then delete children
+        if (childLists.isPresent()) {
+            childLists.get().forEach(cl -> {
+                cardRepository.deleteForList(boardId);
+            });
+            counter=childLists.get().size();
+        }
+
+        //finally, delete board
+        String sql = "DELETE FROM " + TABLE_NAME + WHERE_PARENT_ID;
+        return counter += jdbcTemplate.update(sql, boardId);
     }
     
 }

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/boards")
-//@CrossOrigin(origins = "*")//or 4200 for dev
 public class BoardsController {
 
     @Autowired
@@ -57,16 +56,19 @@ public class BoardsController {
     
     //TODO: search by text and pagination
     
-    @PutMapping("/{id}")
-    public Optional<BBBoard> update(@PathVariable Long id, @RequestBody BBBoard list) 
+    @PutMapping()
+    public Optional<BBBoard> update(@RequestBody BBBoard board) 
     {
-        if(id!=list.getId()){
-            throw new BadRequestException("Wrong id");
+        if(board==null)
+            System.out.println("board is null...");
+        
+        if(null==board.getId()){
+            throw new BadRequestException("Missing id");
         }
         try
         {
-            repository.update(list);
-            return repository.findById(id);
+            repository.update(board);
+            return repository.findById(board.getId());
         }
         catch(Exception ex)
         {
@@ -80,8 +82,8 @@ public class BoardsController {
         try
         {
             int result = repository.delete(id);
-            if(result == 1)
-                return "Board deleted";
+            if(result >= 1)
+                return "Board deleted and "+ (--result)+" children lists and cards";
             else 
                 return "No board found";
         }
@@ -90,8 +92,6 @@ public class BoardsController {
             System.out.println(ex.getMessage());
             throw new BadRequestException(ex.getMessage());
         }  
-    }
-    
-    
+    }       
     
 }

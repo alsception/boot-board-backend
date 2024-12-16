@@ -27,6 +27,7 @@ public class CardRepository {
     private static final String TABLE_NAME = "cards";
     private static final String SELECT_CLAUSE = "SELECT * FROM "+TABLE_NAME+"";
     private static final String WHERE_ID = " WHERE id = ?";
+    private static final String WHERE_PARENT_ID = " WHERE list_id = ?";
     private static final String ORDER_BY = " ORDER BY CASE WHEN position > 0 THEN 0 ELSE 1 END ASC, position ASC, updated ASC, id ASC";
     
     public CardRepository(JdbcTemplate jdbcTemplate) {
@@ -149,6 +150,13 @@ public class CardRepository {
     public int delete(Long id) {
         String sql = "DELETE FROM " + TABLE_NAME + WHERE_ID;
         return jdbcTemplate.update(sql, id);
+    }
+    
+    //This function deletes child cards for parent board
+    public int deleteForList(Long cardId) 
+    {          
+        String sql = "DELETE FROM " + TABLE_NAME + WHERE_PARENT_ID;
+        return jdbcTemplate.update(sql, cardId);
     }
     
 }
