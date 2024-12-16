@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/cards")
-@CrossOrigin(origins = "*")//or 4200 for dev
+//@CrossOrigin(origins = "*")//or 4200 for dev
 public class CardsController {
 
     @Autowired
@@ -44,16 +44,11 @@ public class CardsController {
     
     //TODO: search by text and pagination
     
-    @PutMapping(/*"/{id}"*/)
-    public Optional<BBCard> update(/*@PathVariable Long id, */@RequestBody BBCard card) 
+    @PutMapping()
+    public Optional<BBCard> update(@RequestBody BBCard card) 
     {
         if(card==null)
             System.out.println("card is null...");
-        
-        System.out.println("Update card:");
-        System.out.println("Received item: ");
-        System.out.println(card);
-        
         
         if(null==card.getId()){
             throw new BadRequestException("Missing id");

@@ -2,6 +2,7 @@ package org.alsception.bootboard.controllers;
 
 import java.util.List;
 import java.util.Optional;
+import org.alsception.bootboard.entities.BBCard;
 import org.alsception.bootboard.entities.BBList;
 import org.alsception.bootboard.error.BadRequestException;
 import org.alsception.bootboard.repositories.ListRepository;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/lists")
-@CrossOrigin(origins = "*")//or 4200 for dev
+//@CrossOrigin(origins = "http://localhost:4200/boot-board-front") // Allow specific origin
 public class ListsController {
 
     @Autowired
@@ -56,16 +57,23 @@ public class ListsController {
     
     //TODO: search by text and pagination
     
-    @PutMapping("/{id}")
-    public Optional<BBList> update(@PathVariable Long id, @RequestBody BBList list) 
+    @PutMapping()
+    public BBList update(@RequestBody BBList list) 
     {
-        if(id!=list.getId()){
-            throw new BadRequestException("Wrong id");
+        if(list==null)
+            System.out.println("List is null...");
+        
+        if(null==list.getId()){
+            throw new BadRequestException("Missing id");
         }
         try
         {
+            //TODO: update frontend to return only list without cards here
+            //For now we need it here
+            
             listRepository.update(list);
-            return listRepository.findById(id);
+            
+            return listRepository.findByIdWithCards(list.getId()).get();
         }
         catch(Exception ex)
         {

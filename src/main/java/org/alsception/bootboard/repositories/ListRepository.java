@@ -278,7 +278,6 @@ public class ListRepository {
         };
     }
     
-    // Method to update an clist by ID
     public int update(BBList e) {
         String sql = "UPDATE " + TABLE_NAME + " SET "
                 + "user_id = ?, "
@@ -287,7 +286,7 @@ public class ListRepository {
                 + "color = ?, "
                 + "type = ?, "
                 + "position = ?, "
-                + "updated_at = CURRENT_TIMESTAMP "
+                + "updated = CURRENT_TIMESTAMP "
                 + WHERE_ID;        
         return jdbcTemplate.update(sql, e.getUserId(), e.getBoardId(), e.getTitle(), e.getColor(), e.getType(), e.getPosition(), e.getId());
     }

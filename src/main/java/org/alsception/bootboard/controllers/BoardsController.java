@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/boards")
-@CrossOrigin(origins = "*")//or 4200 for dev
+//@CrossOrigin(origins = "*")//or 4200 for dev
 public class BoardsController {
 
     @Autowired
