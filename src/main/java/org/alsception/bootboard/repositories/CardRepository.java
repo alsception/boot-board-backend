@@ -165,7 +165,5 @@ public class CardRepository {
 
         // Execute the query and retrieve the count
         return jdbcTemplate.queryForObject(sql, new Object[]{listId}, Integer.class);
-    }
-
-    
+    }    
 }

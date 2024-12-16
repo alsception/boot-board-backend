@@ -50,8 +50,8 @@ public class BoardsController {
     @GetMapping("/lists")
     public /*List<BBBoard>*/void getAllWithLists() 
     {
-        System.out.println("get all with lists");
-        //return repository.findAllWithCards();
+        //TODO:
+        //For now we load list details one by one from client...
     }
     
     //TODO: search by text and pagination

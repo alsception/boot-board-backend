@@ -158,6 +158,9 @@ public class ListRepository {
         String sql = SELECT_CLAUSE + WHERE_ID;
         try {
             BBList clist = jdbcTemplate.queryForObject(sql, new Object[]{id}, clistRowMapper());
+            
+            //Dali nam treba total cards ovde sada? i da i ne
+            
             return Optional.of(clist); // Wrap the result in Optional
         } catch (EmptyResultDataAccessException e) {
             System.out.println("No card list found with id: " + id);
@@ -177,7 +180,6 @@ public class ListRepository {
                 if(cards.isPresent())
                 {
                     cardList.get().setCards(cards.get());
-                    System.out.println("total cars: "+this.cardRepository.getTotalCardsForList(id));
                     cardList.get().setTotalCards(cards.get().size());
                 }
             }catch(Exception e){
