@@ -38,10 +38,9 @@ public class BoardRepository {
     public BoardRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }   
-
-    public BBBoard create(BBBoard board) throws Exception
+    
+    public BBBoard save(BBBoard board) throws Exception
     {
-        board.setId(UniqueIdGenerator.generateNanoId());
         String sql = "INSERT INTO " + TABLE_NAME + " (id, user_id, title, color, type, position, created) VALUES (?, ?, ?, ?, ?, ?, ?)";
         System.out.println(sql);        
         // Using KeyHolder to capture the generated key
@@ -69,7 +68,17 @@ public class BoardRepository {
             //createdBoard = findById(generatedId).orElseThrow(() -> new Exception("Error creating board. Could not load new card from database ERR66"));
         }
         
-        return createdBoard;        
+        return createdBoard;    
+    }
+    
+    /**
+     * Diff between save and create is that one assign id and other not     
+     */
+
+    public BBBoard create(BBBoard board) throws Exception
+    {
+        board.setId(UniqueIdGenerator.generateNanoId());
+        return this.save(board);
     }
 
     private void addCards(BBBoard createdBoard) {

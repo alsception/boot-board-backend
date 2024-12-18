@@ -81,4 +81,18 @@ public class CardsController {
         }  
     }  
     
+    @GetMapping("/swap/{id1}/{id2}")
+    public String swap(@PathVariable Long id1, @PathVariable Long id2) 
+    {
+                
+        if( this.repository.swapPositions(id1, id2) )
+        {
+            System.out.println("swaped ids: "+id1+","+id2);
+            return "ok";
+        }else{
+            return "Error happened while swapping cards.";
+        }
+        
+    }
+    
 }

@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.alsception.bootboard.entities.BBBoard;
 import org.alsception.bootboard.error.BadRequestException;
 import org.alsception.bootboard.repositories.BoardRepository;
+import org.alsception.bootboard.services.TemplateEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,13 +14,28 @@ import org.springframework.web.bind.annotation.*;
 public class BoardsController {
 
     @Autowired
-    private BoardRepository repository;
+    private BoardRepository repository;    
+    
+    private final TemplateEngine templateEngine;
+
+    @Autowired
+    public BoardsController(TemplateEngine templateEngine) {
+        this.templateEngine = templateEngine;
+    }
     
     @PostMapping
     public BBBoard create(@RequestBody BBBoard entry) throws BadRequestException 
     {
         try
         {
+            if(entry != null){
+                if( entry.getType() != null ){
+                    if( entry.getType().equalsIgnoreCase("CREATE_TEMPLATE_T001_DAILY_BOARD")){
+                        return templateEngine.createTemplate_DailyBoard(entry);
+                    }
+                }
+            }
+            
             return repository.create(entry);            
         }
         catch(Exception ex)

@@ -28,7 +28,8 @@ public class CardRepository {
     private static final String SELECT_CLAUSE = "SELECT * FROM "+TABLE_NAME+"";
     private static final String WHERE_ID = " WHERE id = ?";
     private static final String WHERE_PARENT_ID = " WHERE list_id = ?";
-    private static final String ORDER_BY = " ORDER BY CASE WHEN position > 0 THEN 0 ELSE 1 END ASC, position ASC, updated ASC, id ASC";
+    /*private static final String ORDER_BY = " ORDER BY CASE WHEN position > 0 THEN 0 ELSE 1 END ASC, position ASC, updated ASC, id ASC";*/
+    private static final String ORDER_BY = " ORDER BY position ASC, id ASC ";
     
     public CardRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -93,7 +94,7 @@ public class CardRepository {
     
     public Optional<List<BBCard>> findByListId(Long listId) 
     {
-        String sql = SELECT_CLAUSE + " WHERE list_id = ?";
+        String sql = SELECT_CLAUSE + " WHERE list_id = ? "+ORDER_BY;
         
         try {
             List<BBCard> cards = jdbcTemplate.query(sql, new Object[]{listId}, // Pass the parameter value for the placeholder
@@ -157,6 +158,44 @@ public class CardRepository {
     {          
         String sql = "DELETE FROM " + TABLE_NAME + WHERE_PARENT_ID;
         return jdbcTemplate.update(sql, cardId);
+    }
+    
+    public boolean swapPositions(long id1, long id2)
+    {
+        // dev-Comment: 
+        // This logic should(?) actually go in some other (business) layer between controller and repository
+        // But for now ok
+        
+        //1. Load 1 card
+        //2. load 2 card
+        //3. swap
+        //4. save
+        
+        if(id1==id2){
+            System.out.println("INFO: Received same ids for swapping: "+id1);
+            return true;
+        }
+            
+        BBCard card1 = findById(id1).orElseThrow(() -> new RuntimeException("Card with id not found: "+id1));        
+        BBCard card2 = findById(id2).orElseThrow(() -> new RuntimeException("Card with id not found: "+id2));
+        
+        int position1 = card1.getPosition();
+        int position2 = card2.getPosition();
+        
+        if(position1 == position2){
+            System.out.println("WARN: Both positions are the same: "+position1);
+            return true;
+        }
+        
+        card1.setPosition(position2);
+        card2.setPosition(position1);
+        
+        int result = 0;
+        
+        result += update(card1);
+        result += update(card2);
+        
+        return result == 2;
     }
     
 }
