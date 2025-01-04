@@ -27,7 +27,9 @@ public class BoardRepository {
     private static final String TABLE_NAME = "boards";
     private static final String SELECT_CLAUSE = "SELECT * FROM "+TABLE_NAME+ " ";
     private static final String WHERE_ID = " WHERE id = ?";
+    private static final String WHERE_ID_GREATER = " WHERE id > ?";
     private static final String ORDER_BY = " ORDER BY CASE WHEN position > 0 THEN 0 ELSE 1 END ASC, position ASC, id ASC";
+    private static final String ORDER_BY_INVERSE = " ORDER BY CASE WHEN position > 0 THEN 0 ELSE 1 END DESC, position DESC, id DESC";
     
     @Autowired
     private CardRepository cardRepository;
@@ -216,6 +218,68 @@ public class BoardRepository {
     {
         String sql = SELECT_CLAUSE + ORDER_BY;
         List<BBBoard> clc = jdbcTemplate.query(sql, (rs, rowNum) ->                                
+            new BBBoard(
+                rs.getLong("id"),                         
+                rs.getLong("user_id"),                         
+                rs.getString("title"),    
+                rs.getString("color"),
+                rs.getString("type"), 
+                rs.getInt("position"),
+                rs.getTimestamp("created").toLocalDateTime(),
+                rs.getTimestamp("updated").toLocalDateTime(),
+                null
+            ));
+        return Optional.ofNullable(clc);
+    }    
+    
+    public Optional<BBBoard> findNext(long id) 
+    {
+        System.out.println("Creating sql ");
+        String sql = SELECT_CLAUSE + WHERE_ID_GREATER + ORDER_BY + " LIMIT 1";;
+        System.out.println("Executing: "+sql);
+        
+        BBBoard clc = jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) ->                                
+            new BBBoard(
+                rs.getLong("id"),                         
+                rs.getLong("user_id"),                         
+                rs.getString("title"),    
+                rs.getString("color"),
+                rs.getString("type"), 
+                rs.getInt("position"),
+                rs.getTimestamp("created").toLocalDateTime(),
+                rs.getTimestamp("updated").toLocalDateTime(),
+                null
+            ));
+        System.out.println("Returning result");
+        return Optional.ofNullable(clc);
+        
+        /**
+         Capcha preadlaze ya empty result set error
+         * List<BBBoard> results = jdbcTemplate.query(sql, new Object[]{id}, (rs, rowNum) ->
+        new BBBoard(
+            rs.getLong("id"),
+            rs.getLong("user_id"),
+            rs.getString("title"),
+            rs.getString("color"),
+            rs.getString("type"),
+            rs.getInt("position"),
+            rs.getTimestamp("created").toLocalDateTime(),
+            rs.getTimestamp("updated").toLocalDateTime(),
+            null
+        )
+    );
+
+    // Return the first result if present, otherwise return an empty Optional
+    return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+         */
+        
+        
+    }    
+    
+    public Optional<BBBoard> findPrev(long id) 
+    {
+        String sql = SELECT_CLAUSE +  " WHERE id < ?" + ORDER_BY_INVERSE + " LIMIT 1";;
+        BBBoard clc = jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) ->                                
             new BBBoard(
                 rs.getLong("id"),                         
                 rs.getLong("user_id"),                         

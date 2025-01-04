@@ -63,6 +63,19 @@ public class BoardsController {
         return repository.findAll();
     }
     
+    @GetMapping("/{id}/next")
+    public Optional<BBBoard> getNext(@PathVariable Long id) 
+    {
+        return repository.findNext(id);
+    }
+    
+    @GetMapping("/{id}/prev")
+    public Optional<BBBoard> getPrev(@PathVariable Long id) 
+    {
+        System.out.println("get prev");
+        return repository.findPrev(id);
+    }
+    
     @GetMapping("/lists")
     public /*List<BBBoard>*/void getAllWithLists() 
     {

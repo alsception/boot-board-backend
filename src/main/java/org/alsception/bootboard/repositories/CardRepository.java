@@ -154,7 +154,7 @@ public class CardRepository {
     }
     
     //This function deletes child cards for parent board
-    public int deleteForList(Long cardId) 
+public int deleteForList(Long cardId) 
     {          
         String sql = "DELETE FROM " + TABLE_NAME + WHERE_PARENT_ID;
         return jdbcTemplate.update(sql, cardId);
